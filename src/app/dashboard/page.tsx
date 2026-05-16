@@ -1,11 +1,13 @@
 'use client';
 
 import { useAuth } from '../../hooks/useAuth';
+import { ProtectedRoute } from '../../components/common/ProtectedRoute';
 
 export default function Dashboard() {
   const { logout } = useAuth();
 
   return (
+    <ProtectedRoute>
     <div className="p-8">
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="mt-4">Se você está vendo isso, o login funcionou e o Token está salvo!</p>
@@ -17,5 +19,6 @@ export default function Dashboard() {
         Sair do Sistema
       </button>
     </div>
+    </ProtectedRoute>
   );
 }

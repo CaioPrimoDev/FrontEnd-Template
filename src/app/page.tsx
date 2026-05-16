@@ -1,11 +1,8 @@
-import { Header } from '../components/layouts/Header';
 import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header />
-      
+    <div className="min-h-screen bg-gray-50 flex flex-col">      
       {/* Hero Section */}
       <main className="grow flex flex-col items-center justify-center text-center px-4">
         <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">

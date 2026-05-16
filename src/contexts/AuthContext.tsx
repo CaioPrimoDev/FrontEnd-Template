@@ -4,8 +4,15 @@ import { createContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../services/api';
 
-// 1. Adicionamos o isLoading na tipagem
+// 1. Criamos a interface para o Usuário
+interface User {
+  email: string;
+  perfis: string[];
+}
+
+// 2. Adicionamos o "user" na tipagem do Contexto
 interface AuthContextData {
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean; 
   login: (email: string, senha: string) => Promise<void>;
@@ -15,22 +22,28 @@ interface AuthContextData {
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // 3. Novo estado para armazenar os dados do usuário
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // 2. Começamos como "true", pois o site inicia verificando se há token
   const [isLoading, setIsLoading] = useState(true); 
   const router = useRouter();
 
   useEffect(() => {
-    // 3. Função assíncrona para driblar o aviso de "setState" síncrono do React
     const loadStorageData = async () => {
       const token = localStorage.getItem('@Boilerplate:token');
+      // Buscamos também os dados do usuário salvos no cache do navegador
+      const storageEmail = localStorage.getItem('@Boilerplate:email');
+      const storagePerfis = localStorage.getItem('@Boilerplate:perfis');
       
-      if (token) {
+      if (token && storageEmail && storagePerfis) {
+        // Restauramos o estado do usuário ao recarregar a página
+        setUser({ 
+          email: storageEmail, 
+          perfis: JSON.parse(storagePerfis) 
+        });
         setIsAuthenticated(true);
       }
       
-      // Avisa que terminou de checar, tendo ou não o token
       setIsLoading(false);
     };
 
@@ -40,10 +53,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, senha: string) {
     try {
       const response = await api.post('/auth/login', { login: email, senha });
-      const { token } = response.data;
+      
+      // 4. Pegamos o token, email e perfis da resposta do back-end
+      // Renomeamos 'email' da resposta para 'userEmail' para não dar conflito com o parâmetro da função
+      const { token, email: userEmail, perfis } = response.data;
 
+      // 5. Salvamos tudo no localStorage
       localStorage.setItem('@Boilerplate:token', token);
+      localStorage.setItem('@Boilerplate:email', userEmail);
+      localStorage.setItem('@Boilerplate:perfis', JSON.stringify(perfis));
+
+      // 6. Atualizamos os estados
+      setUser({ email: userEmail, perfis });
       setIsAuthenticated(true);
+      
       router.push('/dashboard');
     } catch (error) {
       console.error('Erro ao fazer login', error);
@@ -52,13 +75,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    // 7. Limpamos TUDO no logout
     localStorage.removeItem('@Boilerplate:token');
+    localStorage.removeItem('@Boilerplate:email');
+    localStorage.removeItem('@Boilerplate:perfis');
+    
+    setUser(null);
     setIsAuthenticated(false);
     router.push('/login'); 
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    // 8. Disponibilizamos o "user" no Provider
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
