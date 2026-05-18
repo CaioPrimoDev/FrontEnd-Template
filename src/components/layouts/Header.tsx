@@ -38,8 +38,8 @@ export function Header() {
                 {isMenuOpen && (
                   <div className="absolute right-0 top-12 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-xl py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                      {/* Mostra o e-mail do usuário logado de forma elegante */}
-                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      {/* Mostra o nome do usuário logado de forma elegante */}
+                      <p className="text-xs text-gray-500 truncate">{user?.nome}</p>
                     </div>
 
                     <Link 

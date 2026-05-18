@@ -6,6 +6,7 @@ import api from '../services/api';
 
 // 1. Criamos a interface para o Usuário
 interface User {
+  nome: string;
   email: string;
   perfis: string[];
 }
@@ -32,12 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loadStorageData = async () => {
       const token = localStorage.getItem('@Boilerplate:token');
       // Buscamos também os dados do usuário salvos no cache do navegador
+      const storageNome = localStorage.getItem('@Boilerplate:nome');
       const storageEmail = localStorage.getItem('@Boilerplate:email');
       const storagePerfis = localStorage.getItem('@Boilerplate:perfis');
       
-      if (token && storageEmail && storagePerfis) {
+      if (token && storageEmail && storagePerfis && storageNome) {
         // Restauramos o estado do usuário ao recarregar a página
         setUser({ 
+          nome: storageNome,
           email: storageEmail, 
           perfis: JSON.parse(storagePerfis) 
         });
@@ -53,18 +56,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, senha: string) {
     try {
       const response = await api.post('/auth/login', { login: email, senha });
+      console.log(response.data)
       
       // 4. Pegamos o token, email e perfis da resposta do back-end
       // Renomeamos 'email' da resposta para 'userEmail' para não dar conflito com o parâmetro da função
-      const { token, email: userEmail, perfis } = response.data;
+      // Usa-se userEmail para deixar claro que é o email do usuário logado, e não o email que foi passado para a função de login
+      const { token, email: userEmail, perfis, nome } = response.data;
 
       // 5. Salvamos tudo no localStorage
       localStorage.setItem('@Boilerplate:token', token);
       localStorage.setItem('@Boilerplate:email', userEmail);
       localStorage.setItem('@Boilerplate:perfis', JSON.stringify(perfis));
+      localStorage.setItem('@Boilerplate:nome', nome);
 
       // 6. Atualizamos os estados
-      setUser({ email: userEmail, perfis });
+      setUser({ email: userEmail, perfis, nome });
       setIsAuthenticated(true);
       
       router.push('/dashboard');
@@ -79,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('@Boilerplate:token');
     localStorage.removeItem('@Boilerplate:email');
     localStorage.removeItem('@Boilerplate:perfis');
-    
+    localStorage.removeItem('@Boilerplate:nome');
     setUser(null);
     setIsAuthenticated(false);
     router.push('/login'); 

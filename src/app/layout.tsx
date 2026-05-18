@@ -7,8 +7,8 @@ import { HeaderWrapper } from "../components/layouts/HeaderWrapper"; // Ajuste o
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Meu Boilerplate Profissional",
-  description: "Next.js + Spring Boot",
+  title: "Demonstração | Desenvolvedor Full-Stack",
+  description: "Ambiente de teste e portfólio. Desenvolvimento de sistemas web modernos e seguros com Next.js e Spring Boot.",
 };
 
 export default function RootLayout({
